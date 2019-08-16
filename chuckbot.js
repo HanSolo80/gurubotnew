@@ -8,13 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const helpers_1 = require("../helpers");
+const helpers_1 = require("./helpers");
 const html_entities_1 = require("html-entities");
-module.exports = (controller) => {
-    controller.hears('\\+chuck', 'message', (bot, message) => __awaiter(this, void 0, void 0, function* () {
-        yield helpers_1.default.getJSONFromUrl("http://api.icndb.com/jokes/random/").then((fact) => __awaiter(this, void 0, void 0, function* () {
-            yield bot.reply(message, html_entities_1.AllHtmlEntities.decode(fact.value.joke));
-        }));
-    }));
-};
+class ChuckBot {
+    constructor() {
+        this.commandMap = new Map();
+        this.commandMap.set('chuck', this.getCitation());
+    }
+    getAvailableCommands() {
+        return this.commandMap.keys();
+    }
+    triggerCommand(command) {
+        return this.commandMap.get(command);
+    }
+    getCitation() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const fact = yield helpers_1.default.getJSONFromUrl('http://api.icndb.com/jokes/random/');
+            return html_entities_1.AllHtmlEntities.decode(fact.value.joke);
+        });
+    }
+}
+exports.default = ChuckBot;
 //# sourceMappingURL=chuckbot.js.map

@@ -3,6 +3,7 @@ import {WebAdapter} from 'botbuilder-adapter-web';
 import {Botkit} from 'botkit';
 import {MongoDbStorage} from 'botbuilder-storage-mongodb/lib/MongoDbStorage';
 import {BotkitCMSHelper} from 'botkit-plugin-cms';
+import ChuckBot from './chuckbot';
 
 
 dotenv.config();
@@ -50,6 +51,15 @@ controller.ready(() => {
 
 	// load traditional developer-created local custom feature modules
 	controller.loadModules(__dirname + '/features');
+
+	const chuckbot = new ChuckBot();
+
+	for (let command of chuckbot.getAvailableCommands()) {
+		controller.hears(command, 'message', async (bot, message) => {
+			const reply = await chuckbot.triggerCommand(command);
+			await bot.reply(message, reply);
+		});
+	}
 
 	/* catch-all that uses the CMS to trigger dialogs */
 	if (controller.plugins.cms) {

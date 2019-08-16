@@ -13,6 +13,7 @@ const botbuilder_adapter_web_1 = require("botbuilder-adapter-web");
 const botkit_1 = require("botkit");
 const MongoDbStorage_1 = require("botbuilder-storage-mongodb/lib/MongoDbStorage");
 const botkit_plugin_cms_1 = require("botkit-plugin-cms");
+const chuckbot_1 = require("./chuckbot");
 dotenv.config();
 //  __   __  ___        ___
 // |__) /  \  |  |__/ |  |
@@ -47,6 +48,13 @@ if (process.env.cms_uri) {
 controller.ready(() => {
     // load traditional developer-created local custom feature modules
     controller.loadModules(__dirname + '/features');
+    const chuckbot = new chuckbot_1.default();
+    for (let command of chuckbot.getAvailableCommands()) {
+        controller.hears(command, 'message', (bot, message) => __awaiter(this, void 0, void 0, function* () {
+            const reply = yield chuckbot.triggerCommand(command);
+            yield bot.reply(message, reply);
+        }));
+    }
     /* catch-all that uses the CMS to trigger dialogs */
     if (controller.plugins.cms) {
         controller.on('message,direct_message', (bot, message) => __awaiter(this, void 0, void 0, function* () {
