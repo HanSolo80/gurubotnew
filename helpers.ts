@@ -1,11 +1,13 @@
-const request = require("request");
+let request = require('request');
 
-const proxy = request.defaults({'proxy': 'http://clientproxy.basf.net:8080'});
+if (process.env.proxy) {
+	request = request.defaults({'proxy': process.env.proxy});
+}
 
 export default class Helpers {
 	public static getJSONFromUrl(url: string): Promise<any> {
 		return new Promise(function (resolve: Function, reject: Function) {
-			proxy.get({
+			request.get({
 				url: url,
 				json: true,
 				headers: { 'User-Agent': 'request' }
@@ -33,4 +35,6 @@ export default class Helpers {
 		}
 		return out;
 	}
+
+	public static;
 }

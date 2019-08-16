@@ -2,17 +2,10 @@ import * as dotenv from 'dotenv';
 import {WebAdapter} from 'botbuilder-adapter-web';
 import {Botkit} from 'botkit';
 import {MongoDbStorage} from 'botbuilder-storage-mongodb/lib/MongoDbStorage';
-import {BotkitCMSHelper} from 'botkit-plugin-cms';
-import ChuckBot from './chuckbot';
-
+import ChuckBot from './features/chuckbot';
+import BoobBot from './features/boobbot';
 
 dotenv.config();
-
-//  __   __  ___        ___
-// |__) /  \  |  |__/ |  |
-// |__) \__/  |  |  \ |  |
-
-// This is the main file for the guru bot.
 
 let storage = null;
 if (process.env.MONGO_URI) {
@@ -22,7 +15,6 @@ if (process.env.MONGO_URI) {
 }
 
 const adapter = new WebAdapter({});
-
 
 const controller = new Botkit({
 	adapterConfig: {},
@@ -50,28 +42,20 @@ if (process.env.cms_uri) {
 controller.ready(() => {
 
 	// load traditional developer-created local custom feature modules
-	controller.loadModules(__dirname + '/features');
+	controller.loadModules(__dirname + '/webfeatures');
 
 	const chuckbot = new ChuckBot();
+	const boobbot = new BoobBot();
 
-	for (let command of chuckbot.getAvailableCommands()) {
-		controller.hears(command, 'message', async (bot, message) => {
-			const reply = await chuckbot.triggerCommand(command);
-			await bot.reply(message, reply);
-		});
-	}
-
-	/* catch-all that uses the CMS to trigger dialogs */
-	if (controller.plugins.cms) {
-		controller.on('message,direct_message', async (bot, message) => {
-			let results = false;
-			results = await controller.plugins.cms.testTrigger(bot, message);
-
-			if (results !== false) {
-				// do not continue middleware!
-				return false;
-			}
-		});
+	const activeBots: BotFeature[] = [chuckbot, boobbot];
+	for (let activeBot of activeBots) {
+		for (let command of activeBot.getAvailableCommands()) {
+			controller.hears(command, 'message', async (bot, message) => {
+				const replyFunction = activeBot.triggerCommand(command);
+				const reply = await replyFunction();
+				await bot.reply(message, reply);
+			});
+		}
 	}
 
 });

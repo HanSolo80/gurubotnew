@@ -1,0 +1,3 @@
+interface StringPromiseFunction {
+	(): Promise<String>
+}

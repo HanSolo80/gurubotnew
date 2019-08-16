@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const request = require("request");
-const proxy = request.defaults({ 'proxy': 'http://clientproxy.basf.net:8080' });
+let request = require('request');
+if (process.env.proxy) {
+    request = request.defaults({ 'proxy': process.env.proxy });
+}
 class Helpers {
     static getJSONFromUrl(url) {
         return new Promise(function (resolve, reject) {
-            proxy.get({
+            request.get({
                 url: url,
                 json: true,
                 headers: { 'User-Agent': 'request' }
